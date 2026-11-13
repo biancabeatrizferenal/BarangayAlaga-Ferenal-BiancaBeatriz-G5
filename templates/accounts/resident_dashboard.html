@@ -1,0 +1,241 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Dashboard | Barangay Alaga</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #FFF9F7;
+            font-family: Arial, sans-serif;
+            color: #342329;
+        }
+
+        .navbar {
+            background: #4A0E19;
+            color: white;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .user-info {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: transparent;
+            color: white;
+            border: 1px solid #F1CDD3;
+            border-radius: 6px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #F1CDD3;
+            color: #4A0E19;
+        }
+
+        .logout-btn:focus-visible {
+            outline: 2px solid white;
+            outline-offset: 3px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 50px auto;
+            padding: 0 24px;
+        }
+
+        .welcome-card {
+            background: #751C2B;
+            color: white;
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 30px;
+        }
+
+        .welcome-card h1 {
+            margin-top: 0;
+        }
+
+        .welcome-card p {
+            color: #F1CDD3;
+        }
+
+        .section-title {
+            color: #4A0E19;
+            margin-bottom: 20px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            border: 1px solid #E9D8DC;
+            box-shadow: 0 4px 12px rgba(74, 14, 25, 0.05);
+        }
+
+        .feature-card h3 {
+            color: #751C2B;
+            margin-top: 0;
+        }
+
+        .feature-card p {
+            color: #806C72;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .feature-card a {
+            color: #751C2B;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .coming-soon {
+            color: #751C2B;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 20px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-info {
+                flex-wrap: wrap;
+            }
+
+            .container {
+                margin: 25px auto;
+            }
+
+            .welcome-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="brand">Barangay Alaga</div>
+
+        <div class="user-info">
+            <span>
+                {{ request.user.username }} | Resident
+            </span>
+
+            <form
+                action="{% url 'logout' %}"
+                method="POST"
+                class="logout-form"
+            >
+                {% csrf_token %}
+
+                <button type="submit" class="logout-btn">
+                    Log Out
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="container">
+
+        <section class="welcome-card">
+            <h1>
+                Welcome, {{ request.user.first_name }}!
+            </h1>
+
+            <p>
+                Your community healthcare services,
+                all in one place.
+            </p>
+        </section>
+
+        <h2 class="section-title">Resident Services</h2>
+
+        <div class="card-grid">
+
+            <div class="feature-card">
+                <h3>My Profile</h3>
+
+                <p>
+                    View and update your personal
+                    information and contact details.
+                </p>
+
+                <span class="coming-soon">
+                    Coming Soon
+                </span>
+            </div>
+
+            <div class="feature-card">
+                <h3>Healthcare Appointments</h3>
+
+                <p>
+                    View and manage your community
+                    healthcare appointments.
+                </p>
+
+                <span class="coming-soon">
+                    Coming Soon
+                </span>
+            </div>
+
+            <div class="feature-card">
+                <h3>Health Announcements</h3>
+
+                <p>
+                    Stay informed about barangay
+                    healthcare programs and updates.
+                </p>
+
+                <span class="coming-soon">
+                    Coming Soon
+                </span>
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

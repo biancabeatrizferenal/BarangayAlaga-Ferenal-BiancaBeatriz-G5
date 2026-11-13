@@ -1,0 +1,90 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Log In | Barangay Alaga</title>
+
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+
+    <div class="page-container">
+
+        <header class="brand-panel">
+            <div class="brand-logo">Barangay Alaga</div>
+            <p>Community-Based Healthcare Made Accessible</p>
+        </header>
+
+        <main class="form-panel">
+            <section class="form-card">
+
+                <span class="eyebrow">Welcome Back</span>
+
+                <h1>Log In</h1>
+
+                <p class="subtitle">
+                    Access your Barangay Alaga account
+                    and community healthcare services.
+                </p>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.errors %}
+                    <div class="alert error-alert" role="alert">
+                        Invalid username or password.
+                        Please try again.
+                    </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}">
+                            Username
+                        </label>
+
+                        {{ form.username }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password.id_for_label }}">
+                            Password
+                        </label>
+
+                        {{ form.password }}
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        Log In
+                    </button>
+                </form>
+
+                <p class="register-text">
+                    Don't have an account?
+                    <a href="{% url 'register' %}">
+                        Create an Account
+                    </a>
+                </p>
+
+            </section>
+        </main>
+
+    </div>
+
+</body>
+</html>
