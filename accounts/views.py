@@ -5,7 +5,11 @@ from django.db import transaction
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 
-from .forms import ResidentRegistrationForm
+from .forms import (
+    ResidentRegistrationForm,
+    UserProfileForm,
+    ResidentProfileForm,
+)
 from .models import User
 
 
@@ -67,4 +71,91 @@ def dashboard_view(request):
 
     return HttpResponseForbidden(
         "Unauthorized account role."
+    )
+
+
+@login_required
+def profile_view(request):
+    user = request.user
+
+    resident_profile = None
+
+    if user.role == User.Role.RESIDENT:
+        resident_profile = getattr(
+            user,
+            "resident_profile",
+            None
+        )
+
+    if request.method == "POST":
+        user_form = UserProfileForm(
+            request.POST,
+            request.FILES,
+            instance=user
+        )
+
+        resident_form = (
+            ResidentProfileForm(
+                request.POST,
+                instance=resident_profile
+            )
+            if resident_profile is not None
+            else None
+        )
+
+        user_valid = user_form.is_valid()
+
+        resident_valid = (
+            resident_form.is_valid()
+            if resident_form is not None
+            else True
+        )
+
+        if user_valid and resident_valid:
+            with transaction.atomic():
+                updated_user = user_form.save()
+
+                if resident_form is not None:
+                    updated_resident_profile = resident_form.save(
+                        commit=False
+                    )
+
+                    updated_resident_profile.phone = (
+                        updated_user.phone
+                    )
+
+                    updated_resident_profile.save()
+
+            messages.success(
+                request,
+                "Your profile has been updated successfully!"
+            )
+
+            return redirect("profile")
+
+        messages.error(
+            request,
+            "Profile update failed. Please correct the errors below."
+        )
+
+    else:
+        user_form = UserProfileForm(
+            instance=user
+        )
+
+        resident_form = (
+            ResidentProfileForm(
+                instance=resident_profile
+            )
+            if resident_profile is not None
+            else None
+        )
+
+    return render(
+        request,
+        "accounts/profile.html",
+        {
+            "user_form": user_form,
+            "resident_form": resident_form,
+        }
     )

@@ -35,8 +35,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # Local applications
     "accounts",
 ]
 
@@ -116,11 +114,10 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Manila"
 
 USE_I18N = True
-
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+# Static files
 STATIC_URL = "static/"
 
 STATICFILES_DIRS = [
@@ -128,10 +125,18 @@ STATICFILES_DIRS = [
 ]
 
 
+# Uploaded profile photos
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 AUTH_USER_MODEL = "accounts.User"
 
+
+# Authentication redirects
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"

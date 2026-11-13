@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Barangay Alaga</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #FFF8F6;
+            color: #342329;
+        }
+
+        nav {
+            background: #4A0E19;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        main {
+            max-width: 680px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #E9D8DC;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 6px 24px rgba(74, 14, 25, 0.07);
+        }
+
+        h1 {
+            color: #4A0E19;
+            margin-top: 0;
+        }
+
+        .subtitle {
+            color: #806C72;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .role {
+            color: #751C2B;
+            font-weight: bold;
+        }
+
+        .photo-container {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .profile-photo {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #E9D8DC;
+        }
+
+        .photo-placeholder {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: #F1E1E5;
+            color: #751C2B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 46px;
+            font-weight: bold;
+        }
+
+        .photo-hint {
+            color: #806C72;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 16px 0 7px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #E9D8DC;
+            border-radius: 8px;
+            font: inherit;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: 2px solid #A34B60;
+        }
+
+        .error {
+            color: #B42336;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .success {
+            background: #E8F5EC;
+            color: #24683B;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .message-error {
+            background: #FCE8E8;
+            color: #B42336;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        button {
+            width: 100%;
+            background: #751C2B;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 25px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #4A0E19;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 24px;
+            }
+
+            nav {
+                padding: 18px 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <strong>Barangay Alaga</strong>
+        <a href="{% url 'dashboard' %}">
+            Back to Dashboard
+        </a>
+    </nav>
+
+    <main>
+        <div class="card">
+            <h1>My Profile</h1>
+
+            <p class="subtitle">
+                Username:
+                <strong>{{ request.user.username }}</strong>
+                <br>
+                Account Role:
+                <span class="role">
+                    {{ request.user.get_role_display }}
+                </span>
+            </p>
+
+            <div class="photo-container">
+                {% if request.user.profile_photo %}
+                    <img
+                        src="{{ request.user.profile_photo.url }}"
+                        alt="My Profile Photo"
+                        class="profile-photo"
+                    >
+                {% else %}
+                    <div class="photo-placeholder">
+                        {{ request.user.username|first|upper }}
+                    </div>
+                {% endif %}
+
+                <p class="photo-hint">
+                    Upload a JPG, PNG, or WebP image (maximum 2 MB).
+                </p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'error' %}message-error{% else %}success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {{ user_form.non_field_errors }}
+                {{ resident_form.non_field_errors }}
+
+                {% for field in user_form %}
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% for error in field.errors %}
+                        <div class="error">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {% if resident_form %}
+                    {% for field in resident_form %}
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% for error in field.errors %}
+                            <div class="error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+
+                <button type="submit">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>
