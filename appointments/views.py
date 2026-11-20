@@ -1,3 +1,4 @@
+
 from functools import wraps
 
 from django.contrib import messages
@@ -10,6 +11,9 @@ from django.views.decorators.http import require_POST
 from accounts.models import User
 from .forms import AppointmentForm
 from .models import Appointment
+
+
+# ROLE-BASED ACCESS CONTROL
 
 
 def resident_required(view_func):
@@ -40,13 +44,30 @@ def staff_required(view_func):
     return wrapper
 
 
+def admin_required(view_func):
+    @wraps(view_func)
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        if request.user.role != User.Role.ADMIN:
+            raise PermissionDenied(
+                "Only administrators can access appointment oversight."
+            )
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
 # RESIDENT APPOINTMENT MANAGEMENT
+
 
 @resident_required
 def appointment_list(request):
-    appointments = Appointment.objects.filter(
-        resident=request.user
-    ).order_by("-created_at")
+    appointments = (
+        Appointment.objects
+        .filter(resident=request.user)
+        .order_by("-created_at")
+    )
 
     return render(
         request,
@@ -66,8 +87,10 @@ def appointment_create(request):
             try:
                 with transaction.atomic():
                     appointment = form.save(commit=False)
+
                     appointment.resident = request.user
                     appointment.status = Appointment.Status.PENDING
+
                     appointment.save()
 
             except IntegrityError:
@@ -276,6 +299,7 @@ def appointment_cancel(request, pk):
 
 # STAFF APPOINTMENT MANAGEMENT
 
+
 @staff_required
 def staff_appointment_list(request):
     appointments = (
@@ -363,4 +387,65 @@ def staff_appointment_update_status(request, pk):
     return redirect(
         "appointments:staff_detail",
         pk=appointment.pk,
+    )
+
+
+# ADMIN APPOINTMENT OVERSIGHT
+
+
+@admin_required
+def admin_appointment_list(request):
+    appointments = (
+        Appointment.objects
+        .select_related("resident")
+        .order_by("-created_at")
+    )
+
+    appointment_counts = {
+        "total": Appointment.objects.count(),
+
+        "pending": Appointment.objects.filter(
+            status=Appointment.Status.PENDING
+        ).count(),
+
+        "confirmed": Appointment.objects.filter(
+            status=Appointment.Status.CONFIRMED
+        ).count(),
+
+        "completed": Appointment.objects.filter(
+            status=Appointment.Status.COMPLETED
+        ).count(),
+
+        "rejected": Appointment.objects.filter(
+            status=Appointment.Status.REJECTED
+        ).count(),
+
+        "cancelled": Appointment.objects.filter(
+            status=Appointment.Status.CANCELLED
+        ).count(),
+    }
+
+    return render(
+        request,
+        "appointments/admin_appointment_list.html",
+        {
+            "appointments": appointments,
+            "appointment_counts": appointment_counts,
+        },
+    )
+
+
+@admin_required
+def admin_appointment_detail(request, pk):
+    appointment = get_object_or_404(
+        Appointment.objects.select_related("resident"),
+        pk=pk,
+    )
+
+    return render(
+        request,
+        "appointments/admin_appointment_detail.html",
+        {
+            "appointment": appointment,
+        },
     )
