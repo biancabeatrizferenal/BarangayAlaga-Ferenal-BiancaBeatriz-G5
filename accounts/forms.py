@@ -64,10 +64,21 @@ class ResidentRegistrationForm(UserCreationForm):
 
     def clean_birth_date(self):
         birth_date = self.cleaned_data["birth_date"]
+        today = date.today()
 
-        if birth_date > date.today():
+        if birth_date > today:
             raise forms.ValidationError(
                 "Date of birth cannot be in the future."
+            )
+
+        age = today.year - birth_date.year - (
+            (today.month, today.day)
+            < (birth_date.month, birth_date.day)
+        )
+
+        if age < 18:
+            raise forms.ValidationError(
+                "You must be at least 18 years old to register."
             )
 
         return birth_date
@@ -114,7 +125,9 @@ class UserProfileForm(forms.ModelForm):
 
         widgets = {
             "profile_photo": forms.ClearableFileInput(
-                attrs={"accept": "image/jpeg,image/png,image/webp"}
+                attrs={
+                    "accept": "image/jpeg,image/png,image/webp"
+                }
             ),
         }
 
@@ -178,9 +191,24 @@ class ResidentProfileForm(forms.ModelForm):
     def clean_birth_date(self):
         birth_date = self.cleaned_data["birth_date"]
 
-        if birth_date and birth_date > date.today():
+        if birth_date is None:
+            return birth_date
+
+        today = date.today()
+
+        if birth_date > today:
             raise forms.ValidationError(
                 "Date of birth cannot be in the future."
+            )
+
+        age = today.year - birth_date.year - (
+            (today.month, today.day)
+            < (birth_date.month, birth_date.day)
+        )
+
+        if age < 18:
+            raise forms.ValidationError(
+                "You must be at least 18 years old."
             )
 
         return birth_date
