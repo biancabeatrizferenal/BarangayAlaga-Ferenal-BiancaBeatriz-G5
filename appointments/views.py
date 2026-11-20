@@ -1,4 +1,3 @@
-
 from functools import wraps
 
 from django.contrib import messages
@@ -9,7 +8,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from accounts.models import User
-
 from .forms import AppointmentForm
 from .models import Appointment
 
@@ -27,6 +25,22 @@ def resident_required(view_func):
 
     return wrapper
 
+
+def staff_required(view_func):
+    @wraps(view_func)
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        if request.user.role != User.Role.STAFF:
+            raise PermissionDenied(
+                "Only staff members can manage appointments."
+            )
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
+# RESIDENT APPOINTMENT MANAGEMENT
 
 @resident_required
 def appointment_list(request):
@@ -256,5 +270,97 @@ def appointment_cancel(request, pk):
 
     return redirect(
         "appointments:detail",
+        pk=appointment.pk,
+    )
+
+
+# STAFF APPOINTMENT MANAGEMENT
+
+@staff_required
+def staff_appointment_list(request):
+    appointments = (
+        Appointment.objects
+        .select_related("resident")
+        .order_by("appointment_date", "appointment_time")
+    )
+
+    return render(
+        request,
+        "appointments/staff_appointment_list.html",
+        {
+            "appointments": appointments,
+        },
+    )
+
+
+@staff_required
+def staff_appointment_detail(request, pk):
+    appointment = get_object_or_404(
+        Appointment.objects.select_related("resident"),
+        pk=pk,
+    )
+
+    return render(
+        request,
+        "appointments/staff_appointment_detail.html",
+        {
+            "appointment": appointment,
+        },
+    )
+
+
+@staff_required
+@require_POST
+def staff_appointment_update_status(request, pk):
+    new_status = request.POST.get("status")
+
+    with transaction.atomic():
+        appointment = get_object_or_404(
+            Appointment.objects.select_for_update(),
+            pk=pk,
+        )
+
+        allowed_transitions = {
+            Appointment.Status.PENDING: {
+                Appointment.Status.CONFIRMED,
+                Appointment.Status.REJECTED,
+            },
+            Appointment.Status.CONFIRMED: {
+                Appointment.Status.COMPLETED,
+            },
+        }
+
+        allowed_statuses = allowed_transitions.get(
+            appointment.status,
+            set(),
+        )
+
+        if new_status not in allowed_statuses:
+            messages.error(
+                request,
+                "Invalid appointment status change.",
+            )
+
+            return redirect(
+                "appointments:staff_detail",
+                pk=appointment.pk,
+            )
+
+        appointment.status = new_status
+
+        appointment.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+    messages.success(
+        request,
+        "Appointment status updated successfully.",
+    )
+
+    return redirect(
+        "appointments:staff_detail",
         pk=appointment.pk,
     )
