@@ -41,6 +41,30 @@
             font-size: 14px;
         }
 
+        .profile-btn {
+            display: inline-block;
+            background: white;
+            color: #751C2B;
+            border: 1px solid white;
+            border-radius: 6px;
+            padding: 8px 14px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .profile-btn:hover {
+            background: #F1CDD3;
+            color: #4A0E19;
+        }
+
+        .profile-btn:focus-visible {
+            outline: 2px solid white;
+            outline-offset: 3px;
+        }
+
         .logout-form {
             margin: 0;
         }
@@ -96,7 +120,10 @@
 
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(
+                auto-fit,
+                minmax(240px, 1fr)
+            );
             gap: 20px;
         }
 
@@ -140,6 +167,7 @@
 
             .user-info {
                 flex-wrap: wrap;
+                gap: 10px;
             }
 
             .container {
@@ -155,12 +183,21 @@
 <body>
 
     <nav class="navbar">
-        <div class="brand">Barangay Alaga</div>
+        <div class="brand">
+            Barangay Alaga
+        </div>
 
         <div class="user-info">
             <span>
                 {{ request.user.username }} | Admin
             </span>
+
+            <a
+                href="{% url 'profile' %}"
+                class="profile-btn"
+            >
+                My Profile
+            </a>
 
             <form
                 action="{% url 'logout' %}"
@@ -169,7 +206,10 @@
             >
                 {% csrf_token %}
 
-                <button type="submit" class="logout-btn">
+                <button
+                    type="submit"
+                    class="logout-btn"
+                >
                     Log Out
                 </button>
             </form>
@@ -190,12 +230,16 @@
             </p>
         </section>
 
-        <h2 class="section-title">Administration Services</h2>
+        <h2 class="section-title">
+            Administration Services
+        </h2>
 
         <div class="card-grid">
 
             <div class="feature-card">
-                <h3>User Management</h3>
+                <h3>
+                    User Management
+                </h3>
 
                 <p>
                     Manage Resident and Staff accounts,
@@ -209,7 +253,9 @@
             </div>
 
             <div class="feature-card">
-                <h3>Healthcare Services</h3>
+                <h3>
+                    Healthcare Services
+                </h3>
 
                 <p>
                     Oversee barangay healthcare services,
@@ -223,7 +269,9 @@
             </div>
 
             <div class="feature-card">
-                <h3>System Overview</h3>
+                <h3>
+                    System Overview
+                </h3>
 
                 <p>
                     Monitor system activity, review
