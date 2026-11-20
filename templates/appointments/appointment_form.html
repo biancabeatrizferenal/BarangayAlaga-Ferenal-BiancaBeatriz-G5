@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | Barangay Alaga</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #FFF9F7;
+            font-family: Arial, sans-serif;
+            color: #342329;
+        }
+
+        .navbar {
+            background: #4A0E19;
+            color: white;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            border: 1px solid #E9D8DC;
+            box-shadow: 0 4px 12px rgba(74, 14, 25, 0.05);
+        }
+
+        h1 {
+            color: #4A0E19;
+            margin-top: 0;
+        }
+
+        .subtitle {
+            color: #806C72;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #751C2B;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D8C3C8;
+            border-radius: 8px;
+            background: white;
+            color: #342329;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid #751C2B;
+            outline-offset: 1px;
+        }
+
+        .error {
+            color: #A11930;
+            font-size: 13px;
+            margin-top: 7px;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: #F1CDD3;
+            color: #4A0E19;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 13px;
+            background: #751C2B;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #4A0E19;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            color: #751C2B;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 20px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .container {
+                margin: 25px auto;
+            }
+
+            .form-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="brand">Barangay Alaga</div>
+
+        <a href="{% url 'appointments:list' %}" class="nav-link">
+            Back to Appointments
+        </a>
+    </nav>
+
+    <main class="container">
+
+        <div class="form-card">
+
+            <h1>{{ page_title }}</h1>
+
+            <p class="subtitle">
+                Please provide your healthcare appointment
+                details. All fields are required.
+            </p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="error">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+
+                    <div class="form-group">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <p class="subtitle">
+                                {{ field.help_text }}
+                            </p>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <div class="error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+                {% endfor %}
+
+                <button type="submit" class="btn">
+                    {{ submit_label }}
+                </button>
+
+            </form>
+
+            <a
+                href="{% url 'appointments:list' %}"
+                class="back-link"
+            >
+                Back to My Appointments
+            </a>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

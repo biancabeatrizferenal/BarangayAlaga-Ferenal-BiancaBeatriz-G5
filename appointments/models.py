@@ -1,6 +1,7 @@
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 
 
 class Appointment(models.Model):
@@ -48,6 +49,23 @@ class Appointment(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "appointment_date",
+                    "appointment_time",
+                ],
+                condition=Q(
+                    status__in=[
+                        "pending",
+                        "confirmed",
+                        "completed",
+                    ]
+                ),
+                name="unique_active_appointment_slot",
+            ),
+        ]
 
     def __str__(self):
         return (
