@@ -51,18 +51,11 @@
             text-decoration: none;
             font-size: 13px;
             font-weight: bold;
-            white-space: nowrap;
-            transition: background 0.2s, color 0.2s;
         }
 
         .profile-btn:hover {
             background: #F1CDD3;
             color: #4A0E19;
-        }
-
-        .profile-btn:focus-visible {
-            outline: 2px solid white;
-            outline-offset: 3px;
         }
 
         .logout-form {
@@ -77,17 +70,11 @@
             padding: 8px 14px;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.2s, color 0.2s;
         }
 
         .logout-btn:hover {
             background: #F1CDD3;
             color: #4A0E19;
-        }
-
-        .logout-btn:focus-visible {
-            outline: 2px solid white;
-            outline-offset: 3px;
         }
 
         .container {
@@ -152,6 +139,17 @@
             line-height: 1.6;
         }
 
+        .feature-card a {
+            color: #751C2B;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .feature-card a:hover {
+            text-decoration: underline;
+        }
+
         .coming-soon {
             color: #751C2B;
             font-size: 13px;
@@ -180,6 +178,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <nav class="navbar">
@@ -192,10 +191,7 @@
                 {{ request.user.username }} | Admin
             </span>
 
-            <a
-                href="{% url 'profile' %}"
-                class="profile-btn"
-            >
+            <a href="{% url 'profile' %}" class="profile-btn">
                 My Profile
             </a>
 
@@ -206,10 +202,7 @@
             >
                 {% csrf_token %}
 
-                <button
-                    type="submit"
-                    class="logout-btn"
-                >
+                <button type="submit" class="logout-btn">
                     Log Out
                 </button>
             </form>
@@ -237,9 +230,7 @@
         <div class="card-grid">
 
             <div class="feature-card">
-                <h3>
-                    User Management
-                </h3>
+                <h3>User Management</h3>
 
                 <p>
                     Manage Resident and Staff accounts,
@@ -253,25 +244,21 @@
             </div>
 
             <div class="feature-card">
-                <h3>
-                    Healthcare Services
-                </h3>
+                <h3>Healthcare Appointments</h3>
 
                 <p>
-                    Oversee barangay healthcare services,
-                    appointment activities, and community
-                    health programs.
+                    Monitor all Resident healthcare
+                    appointments, review booking details,
+                    and track appointment statuses.
                 </p>
 
-                <span class="coming-soon">
-                    Coming Soon
-                </span>
+                <a href="{% url 'appointments:admin_list' %}">
+                    View All Appointments
+                </a>
             </div>
 
             <div class="feature-card">
-                <h3>
-                    System Overview
-                </h3>
+                <h3>System Overview</h3>
 
                 <p>
                     Monitor system activity, review

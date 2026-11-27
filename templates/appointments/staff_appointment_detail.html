@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Appointment | Barangay Alaga</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #FFF9F7;
+            font-family: Arial, sans-serif;
+            color: #342329;
+        }
+
+        .navbar {
+            background: #4A0E19;
+            color: white;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .detail-card {
+            background: white;
+            border: 1px solid #E9D8DC;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 4px 12px rgba(74,14,25,0.05);
+        }
+
+        h1 {
+            color: #4A0E19;
+            margin-top: 0;
+        }
+
+        .status {
+            display: inline-block;
+            background: #F1CDD3;
+            color: #4A0E19;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .detail-row {
+            padding: 16px 0;
+            border-bottom: 1px solid #F0E3E6;
+        }
+
+        .detail-label {
+            display: block;
+            color: #806C72;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .detail-value {
+            font-weight: bold;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            background: #751C2B;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #751C2B;
+            border: 1px solid #751C2B;
+        }
+
+        .message {
+            background: #F1CDD3;
+            color: #4A0E19;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .container {
+                margin: 25px auto;
+            }
+
+            .detail-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="brand">Barangay Alaga</div>
+
+        <a href="{% url 'appointments:staff_list' %}">
+            Back to Appointments
+        </a>
+    </nav>
+
+    <main class="container">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="detail-card">
+
+            <h1>Review Appointment</h1>
+
+            <span class="status">
+                {{ appointment.get_status_display }}
+            </span>
+
+            <div class="detail-row">
+                <span class="detail-label">Resident</span>
+                <span class="detail-value">
+                    {{ appointment.resident.get_full_name|default:appointment.resident.username }}
+                </span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Healthcare Service</span>
+                <span class="detail-value">
+                    {{ appointment.get_service_type_display }}
+                </span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Appointment Date</span>
+                <span class="detail-value">
+                    {{ appointment.appointment_date|date:"F d, Y" }}
+                </span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Appointment Time</span>
+                <span class="detail-value">
+                    {{ appointment.appointment_time|time:"g:i A" }}
+                </span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Reason for Appointment</span>
+                <div class="detail-value">
+                    {{ appointment.reason|linebreaksbr }}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Date Requested</span>
+                <span class="detail-value">
+                    {{ appointment.created_at|date:"F d, Y g:i A" }}
+                </span>
+            </div>
+
+            {% if appointment.status == "pending" %}
+
+                <div class="actions">
+
+                    <form
+                        method="POST"
+                        action="{% url 'appointments:staff_update_status' appointment.pk %}"
+                    >
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="confirmed"
+                        >
+
+                        <button type="submit" class="btn">
+                            Confirm Appointment
+                        </button>
+                    </form>
+
+                    <form
+                        method="POST"
+                        action="{% url 'appointments:staff_update_status' appointment.pk %}"
+                    >
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="rejected"
+                        >
+
+                        <button type="submit" class="btn btn-outline">
+                            Reject Appointment
+                        </button>
+                    </form>
+
+                </div>
+
+            {% elif appointment.status == "confirmed" %}
+
+                <div class="actions">
+
+                    <form
+                        method="POST"
+                        action="{% url 'appointments:staff_update_status' appointment.pk %}"
+                    >
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="completed"
+                        >
+
+                        <button type="submit" class="btn">
+                            Mark as Completed
+                        </button>
+                    </form>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </main>
+
+</body>
+</html>
