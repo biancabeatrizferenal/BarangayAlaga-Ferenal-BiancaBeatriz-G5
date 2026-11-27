@@ -1,10 +1,10 @@
-
 from functools import wraps
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError, transaction
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -401,29 +401,34 @@ def admin_appointment_list(request):
         .order_by("-created_at")
     )
 
-    appointment_counts = {
-        "total": Appointment.objects.count(),
+    appointment_counts = Appointment.objects.aggregate(
+        total=Count("id"),
 
-        "pending": Appointment.objects.filter(
-            status=Appointment.Status.PENDING
-        ).count(),
+        pending=Count(
+            "id",
+            filter=Q(status=Appointment.Status.PENDING),
+        ),
 
-        "confirmed": Appointment.objects.filter(
-            status=Appointment.Status.CONFIRMED
-        ).count(),
+        confirmed=Count(
+            "id",
+            filter=Q(status=Appointment.Status.CONFIRMED),
+        ),
 
-        "completed": Appointment.objects.filter(
-            status=Appointment.Status.COMPLETED
-        ).count(),
+        completed=Count(
+            "id",
+            filter=Q(status=Appointment.Status.COMPLETED),
+        ),
 
-        "rejected": Appointment.objects.filter(
-            status=Appointment.Status.REJECTED
-        ).count(),
+        rejected=Count(
+            "id",
+            filter=Q(status=Appointment.Status.REJECTED),
+        ),
 
-        "cancelled": Appointment.objects.filter(
-            status=Appointment.Status.CANCELLED
-        ).count(),
-    }
+        cancelled=Count(
+            "id",
+            filter=Q(status=Appointment.Status.CANCELLED),
+        ),
+    )
 
     return render(
         request,
