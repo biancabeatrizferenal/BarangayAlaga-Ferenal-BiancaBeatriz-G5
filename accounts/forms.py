@@ -1,10 +1,28 @@
-
+import re
 from datetime import date
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
 from .models import User, ResidentProfile
+
+
+def validate_phone_number(phone):
+    phone = phone.strip()
+
+    if not phone:
+        return phone
+
+    if not re.fullmatch(
+        r"(?:09[0-9]{9}|\+639[0-9]{9})",
+        phone
+    ):
+        raise forms.ValidationError(
+            "Enter a valid Philippine mobile number "
+            "(09XXXXXXXXX or +639XXXXXXXXX)."
+        )
+
+    return phone
 
 
 class ResidentRegistrationForm(UserCreationForm):
@@ -61,6 +79,11 @@ class ResidentRegistrationForm(UserCreationForm):
             )
 
         return email
+
+    def clean_phone(self):
+        return validate_phone_number(
+            self.cleaned_data["phone"]
+        )
 
     def clean_birth_date(self):
         birth_date = self.cleaned_data["birth_date"]
@@ -145,10 +168,15 @@ class UserProfileForm(forms.ModelForm):
 
         return email
 
+    def clean_phone(self):
+        return validate_phone_number(
+            self.cleaned_data["phone"]
+        )
+
     def clean_profile_photo(self):
         photo = self.cleaned_data.get("profile_photo")
 
-        if photo and hasattr(photo, "size"):
+        if photo and hasattr(photo, "image"):
             if photo.size > 2 * 1024 * 1024:
                 raise forms.ValidationError(
                     "Profile photo must be 2 MB or smaller."
@@ -156,11 +184,10 @@ class UserProfileForm(forms.ModelForm):
 
             allowed_formats = {"JPEG", "PNG", "WEBP"}
 
-            if getattr(photo, "image", None):
-                if photo.image.format not in allowed_formats:
-                    raise forms.ValidationError(
-                        "Please upload a JPG, PNG, or WebP image."
-                    )
+            if photo.image.format not in allowed_formats:
+                raise forms.ValidationError(
+                    "Please upload a JPG, PNG, or WebP image."
+                )
 
         return photo
 
